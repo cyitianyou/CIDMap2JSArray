@@ -48,6 +48,8 @@ namespace CIDMap2JSArray
                     if (string.IsNullOrEmpty(line)) continue;
                     DealWithLineString(line, ref ArrayBuild);
                 }
+                if (ArrayBuild.Length > 0)
+                    ArrayBuild.Remove(ArrayBuild.Length - 1, 1);
                 this.txt_JSArray.Text = ArrayBuild.ToString();
             }
             catch (Exception)
