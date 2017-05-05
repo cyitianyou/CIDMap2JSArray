@@ -42,17 +42,12 @@ namespace CIDMap2JSArray
                 if (String.IsNullOrEmpty(this.txt_CIDMap.Text)) return;
                 var lines = this.txt_CIDMap.Text.Replace("\r", "").Split('\n');
                 var ArrayBuild = new StringBuilder();  //普通Unicode存入数组
-                var PolyphoneBuider = new StringBuilder();  //多音字单独存
-                ArrayBuild.AppendLine("{");
                 for (int i = 1; i < lines.Length; i++)  //从文件第二行开始,第一行存总数,忽略
                 {
                     var line = lines[i];
                     if (string.IsNullOrEmpty(line)) continue;
-                    DealWithLineString(line, ref ArrayBuild, ref PolyphoneBuider);
+                    DealWithLineString(line, ref ArrayBuild);
                 }
-                if (ArrayBuild.Length > 1)
-                    ArrayBuild.Remove(ArrayBuild.Length - 1, 1);
-                ArrayBuild.AppendLine("}");
                 this.txt_JSArray.Text = ArrayBuild.ToString();
             }
             catch (Exception)
@@ -60,7 +55,7 @@ namespace CIDMap2JSArray
                 WriteStatusMessage("转换出错");
             }
         }
-        private void DealWithLineString(string line, ref StringBuilder ArrayBuild, ref StringBuilder PolyphoneBuider)
+        private void DealWithLineString(string line, ref StringBuilder ArrayBuild)
         {
             try
             {
@@ -73,7 +68,8 @@ namespace CIDMap2JSArray
                 if (!cid.Contains("..") && !unicode.Contains(","))  //line格式如: 100 02c9
                 {
                     var value = Convert.ToInt32(cid);
-                    ArrayBuild.AppendExt(unicode, value);
+                    int int_unicode = unicode.HexStringToInt();
+                    ArrayBuild.AppendExt(int_unicode, value);
                 }
                 else if (cid.Contains("..") && !unicode.Contains(","))  //line格式如: 1..95 0020
                 {
@@ -84,7 +80,7 @@ namespace CIDMap2JSArray
                     int int_unicode = unicode.HexStringToInt();
                     for (int i = 0; i +start <= end; i++)
                     {
-                        ArrayBuild.AppendExt((int_unicode+i).IntToHexString(), start+i);
+                        ArrayBuild.AppendExt(int_unicode+i, start+i);
                     }
                 }
                 else if (!cid.Contains("..") && unicode.Contains(","))  //line格式如: 108 2026,22ef
@@ -93,7 +89,8 @@ namespace CIDMap2JSArray
                     var value = Convert.ToInt32(cid);
                     foreach (var item in unicodes)
                     {
-                        ArrayBuild.AppendExt(item, value);
+                        int int_unicode = item.HexStringToInt();
+                        ArrayBuild.AppendExt(int_unicode, value);
                     }
                 }
             }
